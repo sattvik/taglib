@@ -4,9 +4,32 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := taglib
 LOCAL_CFLAGS := -DHAVE_ZLIB=1 -DNDEBUG -DWITH_ASF -DWITH_MP4 -DTAGLIB_NO_CONFIG
+LOCAL_EXPORT_CFLAGS := -DTAGLIB_NO_CONFIG
 LOCAL_CPPFLAGS += -frtti
 LOCAL_EXPORT_LDLIBS := -lz
 LOCAL_C_INCLUDES := \
+	$(LOCAL_PATH)/ape \
+	$(LOCAL_PATH)/asf \
+	$(LOCAL_PATH)/flac \
+	$(LOCAL_PATH)/mp4 \
+	$(LOCAL_PATH)/mpc \
+	$(LOCAL_PATH)/mpeg \
+	$(LOCAL_PATH)/mpeg/id3v1 \
+	$(LOCAL_PATH)/mpeg/id3v2 \
+	$(LOCAL_PATH)/mpeg/id3v2/frames \
+	$(LOCAL_PATH)/ogg \
+	$(LOCAL_PATH)/ogg/flac \
+	$(LOCAL_PATH)/ogg/speex \
+	$(LOCAL_PATH)/ogg/vorbis \
+	$(LOCAL_PATH)/riff \
+	$(LOCAL_PATH)/riff/aiff \
+	$(LOCAL_PATH)/riff/wav \
+	$(LOCAL_PATH)/toolkit \
+	$(LOCAL_PATH)/trueaudio \
+	$(LOCAL_PATH)/wavpack \
+
+LOCAL_EXPORT_C_INCLUDES += \
+	$(LOCAL_PATH) \
 	$(LOCAL_PATH)/ape \
 	$(LOCAL_PATH)/asf \
 	$(LOCAL_PATH)/flac \
