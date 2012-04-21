@@ -1,0 +1,4 @@
+In order to compile from Android, you need to make sure your Application.mk has
+the following line:
+
+APP_STL := gnustl_static
