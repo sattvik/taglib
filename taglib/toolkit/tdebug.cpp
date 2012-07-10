@@ -30,26 +30,45 @@
 #include "tdebug.h"
 #include "tstring.h"
 
+#ifdef ANDROID
+#include <android/log.h>
+#define LOG_TAG  "TagLib"
+#define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#endif
+
 using namespace TagLib;
 
 void TagLib::debug(const String &s)
 {
+#ifndef ANDROID
   std::cerr << "TagLib: " << s << std::endl;
+#else
+  LOGD("%s", s.toCString());
+#endif
 }
 
 void TagLib::debugData(const ByteVector &v)
 {
   for(uint i = 0; i < v.size(); i++) {
 
+#ifndef ANDROID
     std::cout << "*** [" << i << "] - '" << char(v[i]) << "' - int " << int(v[i])
               << std::endl;
+#else
+    LOGD("*** [%u] - '%c' - int %d", i, char(v[i]), int(v[i]));
+#endif
 
     std::bitset<8> b(v[i]);
 
+#ifndef ANDROID
     for(int j = 0; j < 8; j++)
       std::cout << i << ":" << j << " " << b.test(j) << std::endl;
 
     std::cout << std::endl;
+#else
+    for(int j = 0; j < 8; j++)
+      LOGD("%u:%d %d", i, j, b.test(j));
+#endif
   }
 }
 #endif
