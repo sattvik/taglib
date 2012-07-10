@@ -207,7 +207,7 @@ void MPEG::Properties::read()
                                                             firstHeader.channelMode());
 
   d->file->seek(first + xingHeaderOffset);
-  d->xingHeader = new XingHeader(d->file->readBlock(16));
+  d->xingHeader = new XingHeader(d->file->readBlock(120));
 
   // Read the length and the bitrate from the Xing header.
 

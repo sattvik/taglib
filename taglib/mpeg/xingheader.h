@@ -77,6 +77,18 @@ namespace TagLib {
        */
       uint totalSize() const;
 
+
+      /*!
+       * Returns the Xing header's table of contents.  If the header does not
+       * contain a TOC, then the vector will be empty.
+       */
+      const ByteVector& toc() const;
+
+      /*!
+       * Returns the VBR scale placed in the Xing header.
+       */
+      uint vbrScale() const;
+
       /*!
        * Returns the offset for the start of this Xing header, given the
        * version and channels of the frame

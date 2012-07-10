@@ -37,12 +37,16 @@ public:
   XingHeaderPrivate() :
     frames(0),
     size(0),
-    valid(false)
+    valid(false),
+    toc(ByteVector::null),
+    vbrScale(0)
     {}
 
   uint frames;
   uint size;
   bool valid;
+  ByteVector toc;
+  uint vbrScale;
 };
 
 MPEG::XingHeader::XingHeader(const ByteVector &data)
@@ -69,6 +73,16 @@ TagLib::uint MPEG::XingHeader::totalFrames() const
 TagLib::uint MPEG::XingHeader::totalSize() const
 {
   return d->size;
+}
+
+const ByteVector& MPEG::XingHeader::toc() const
+{
+  return d->toc;
+}
+
+TagLib::uint MPEG::XingHeader::vbrScale() const
+{
+  return d->vbrScale;
 }
 
 int MPEG::XingHeader::xingHeaderOffset(TagLib::MPEG::Header::Version v,
@@ -110,6 +124,15 @@ void MPEG::XingHeader::parse(const ByteVector &data)
 
   d->frames = data.mid(8, 4).toUInt();
   d->size = data.mid(12, 4).toUInt();
+
+  // Read table of contents
+  if(data[7] & 0x04) {
+    d->toc = data.mid(16, 100);
+  }
+
+  if(data[7] & 0x08) {
+    d->vbrScale = data.mid(116, 4).toUInt();
+  }
 
   d->valid = true;
 }
