@@ -230,15 +230,65 @@ void MPEG::Properties::read()
     delete d->xingHeader;
     d->xingHeader = 0;
 
-    // TODO: Make this more robust with audio property detection for VBR without a
-    // Xing header.
+    // find the first header with a valid frame length and bit rate
+    long pos = first + 4;
+    Header header = firstHeader;
+    while ((!header.isValid()
+             || header.frameLength() <= 0
+             || header.bitrate() <= 0)
+           && pos <= last) {
+       pos = d->file->nextFrameOffset(pos);
+       if (pos > 0 && pos <= last) {
+         d->file->seek(pos);
+         header = Header(d->file->readBlock(4));
+       } else {
+         header = Header(ByteVector::null);
+       }
+    }
 
-    if(firstHeader.frameLength() > 0 && firstHeader.bitrate() > 0) {
-      int frames = (last - first) / firstHeader.frameLength() + 1;
+    // if such a header is found, then potentially scan the file to calculate
+    // the correct bitrate and length
+    if (header.isValid()) {
+      long fileSkip = 0;
+      int samples = 1;
+      long bitrateSum = header.bitrate();
+      long frameLengthSum = header.frameLength();
+      switch(d->style) {
+        case Properties::Fast:
+          // no additional processing
+          break;
+        case Properties::Average:
+          // for Average, take about 100 samples
+          fileSkip = ((last - first) / 100) - 4;
+          // fall-through is on purpose here
+        case Properties::Accurate:
+          // do the actual scanning
+          while ((pos += fileSkip) <= last) {
+            pos = d->file->nextFrameOffset(pos);
+            if (pos > 0 && pos <= last) {
+              d->file->seek(pos);
+              header = Header(d->file->readBlock(4));
 
-      d->length = int(float(firstHeader.frameLength() * frames) /
-                      float(firstHeader.bitrate() * 125) + 0.5);
-      d->bitrate = firstHeader.bitrate();
+              if (header.isValid()
+                  && header.frameLength() > 0
+                  && header.bitrate() > 0) {
+                ++samples;
+                bitrateSum += header.bitrate();
+                frameLengthSum += header.frameLength();
+              }
+            }
+          }
+          break;
+      }
+
+      // finally, calculate length and bitrate based on averaged values
+      long avgFrameLength = frameLengthSum / samples;
+      long avgBitrate = bitrateSum / samples;
+      int frames = (last - first) / avgFrameLength + 1;
+
+      d->length = int(float(avgFrameLength * frames) /
+                      float(avgBitrate * 125) + 0.5);
+      d->bitrate = avgBitrate;
     }
   }
 
