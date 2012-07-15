@@ -258,8 +258,8 @@ void MPEG::Properties::read()
           // no additional processing
           break;
         case Properties::Average:
-          // for Average, take about 100 samples
-          fileSkip = ((last - first) / 100) - 4;
+          // for Average, take about 250 samples
+          fileSkip = ((last - first) / 251) - 4;
           // fall-through is on purpose here
         case Properties::Accurate:
           // do the actual scanning
