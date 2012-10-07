@@ -32,28 +32,40 @@
 
 using namespace TagLib;
 
+namespace {
+
+const short PCM_FORMAT(1);
+const short IEEE_FLOAT_FORMAT(3);
+const short A_LAW_FORMAT(6);
+const short MU_LAW_FORMAT(7);
+const short EXTENSIBLE_FORMAT(0xfffe);
+
+} // anonymous namespace
+
 class RIFF::WAV::Properties::PropertiesPrivate
 {
 public:
   PropertiesPrivate(uint streamLength = 0) :
-    format(0),
+    format(PCM),
     length(0),
     bitrate(0),
     sampleRate(0),
     channels(0),
     sampleWidth(0),
-    streamLength(streamLength)
+    streamLength(streamLength),
+    valid(true)
   {
 
   }
 
-  short format;
+  Format format;
   int length;
   int bitrate;
   int sampleRate;
   int channels;
   int sampleWidth;
   uint streamLength;
+  bool valid;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -102,13 +114,43 @@ int RIFF::WAV::Properties::sampleWidth() const
   return d->sampleWidth;
 }
 
+RIFF::WAV::Properties::Format RIFF::WAV::Properties::format() const
+{
+  return d->format;
+}
+
+bool RIFF::WAV::Properties::isValid() const
+{
+  return d->valid;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // private members
 ////////////////////////////////////////////////////////////////////////////////
 
 void RIFF::WAV::Properties::read(const ByteVector &data)
 {
-  d->format = data.mid(0, 2).toShort(false);
+  short formatCode = data.mid(0, 2).toShort(false);
+  switch(formatCode) {
+    case PCM_FORMAT:
+      d->format = PCM;
+      break;
+    case IEEE_FLOAT_FORMAT:
+      d->format = IEEEFloat;
+      break;
+    case A_LAW_FORMAT:
+      d->format = ALaw;
+      break;
+    case MU_LAW_FORMAT:
+      d->format = MuLaw;
+      break;
+    case EXTENSIBLE_FORMAT:
+      d->format = Extensible;
+      break;
+    default:
+      d->valid = false;
+      break;
+  }
   d->channels = data.mid(2, 2).toShort(false);
   d->sampleRate = data.mid(4, 4).toUInt(false);
   d->sampleWidth = data.mid(14, 2).toShort(false);

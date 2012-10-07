@@ -66,6 +66,22 @@ namespace TagLib {
 	 */
 	virtual ~Properties();
 
+        /*!
+         * The format of the WAV file data.
+         */
+        enum Format {
+          //! Linear PCM encoded data
+          PCM = 0,
+          //! IEE float data
+          IEEEFloat = 1,
+          //! 8-bit ITU-T G.711 A-law
+          ALaw = 2,
+          //! 8-bit ITU-T G.711 µ-law
+          MuLaw = 3,
+          //! Uses extensible format
+          Extensible = 4,
+        };
+
 	// Reimplementations.
 
 	virtual int length() const;
@@ -74,6 +90,8 @@ namespace TagLib {
 	virtual int channels() const;
 
 	int sampleWidth() const;
+        Format format() const;
+        bool isValid() const;
 
       private:
 	Properties(const Properties &);
